@@ -1,3 +1,5 @@
 streamlit~=1.43.2
 numpy_financial
 pandas
+sqlite3
+datetime
