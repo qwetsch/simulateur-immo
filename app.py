@@ -104,12 +104,8 @@ with st.expander("⚙️ Sauvegarde"):
 
 st.markdown("---")
 st.markdown("💖 **Soutenir ce projet**")
-
 st.markdown("""
 Si cette application vous est utile, vous pouvez soutenir son développement ici :
 
 👉 [☕ Offrir un café](https://buymeacoffee.com/qwetsch)
 """)
-st.markdown(
-    "[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Offrez-moi un café&emoji=☕&slug=tonpseudo&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://buymeacoffee.com/qwetsch)"
-)
