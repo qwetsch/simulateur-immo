@@ -1,6 +1,16 @@
 import numpy_financial as npf
 import streamlit as st
+import requests
 from db import  init_db, save_project, load_project, list_projects
+
+def increment_visit_count():
+    try:
+        response = requests.get("https://api.countapi.xyz/hit/simu-immo-visites/streamlit")
+        if response.status_code == 200:
+            return response.json()["value"]
+    except Exception:
+        pass
+    return None
 
 init_db()
 
@@ -109,3 +119,6 @@ Si cette application vous est utile, vous pouvez soutenir son développement ici
 
 👉 [☕ Offrir un café](https://buymeacoffee.com/qwetsch)
 """)
+#if count:
+count = increment_visit_count()
+st.markdown(f"👥 Nombre de visites : **{count}**")
