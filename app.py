@@ -1,6 +1,7 @@
 import numpy_financial as npf
 import streamlit as st
 import requests
+import json
 from db import  init_db, save_project, load_project, list_projects
 
 def increment_visit_count():
@@ -16,12 +17,17 @@ init_db()
 
 st.set_page_config(page_title="Simulateur d'investissement immobilier", page_icon="📈")
 
-st.title("🏠 Simulateur Immobilier 💸")
-
 # Charger un projet existant
 with st.expander("🔄 Charger un projet"):
+    st.markdown("### 📤 Charger un projet depuis un fichier")
+    fichier_json = st.file_uploader("📤 Sélectionner un fichier .json", type="json")
+    if fichier_json is not None:
+        contenu = json.load(fichier_json)
+        for k, v in contenu.items():
+            st.session_state[k] = v
+        st.success("✅ Projet chargé depuis le fichier avec succès")
     projets_disponibles = list_projects()
-    projet_choisi = st.selectbox("📂 Charger un projet existant :", projets_disponibles)
+    projet_choisi = st.selectbox("📂 Charger un projet existant (PROTO)", projets_disponibles)
 
     if st.button("Charger le projet sélectionné"):
         donnees = load_project(projet_choisi)
@@ -29,6 +35,8 @@ with st.expander("🔄 Charger un projet"):
             for k, v in donnees.items():
                 st.session_state[k] = v
             st.success(f"Projet '{projet_choisi}' chargé dans les champs ✅")
+
+st.title("🏠 Simulateur d'Investissement Immobilier 💸")
 
 st.header("💰 ACQUISITION")
 prix = st.number_input("Prix d'achat (hors frais d'agence) (€)", value=100000, key="prix")
@@ -78,6 +86,7 @@ cashflow_mensuel = loyer - total_charge - mensualite_emprunt
 cashflow_annuel = cashflow_mensuel * 12
 rendement_fond_propre = loyer / apport_personnel * 100
 
+st.markdown("---")
 st.header("💸 Résultats")
 st.write(f"Prix au m² : **{prix_m2:.0f} €**")
 st.write(f"Rentabilité brute : **{rentabilite_brute:.0f} %**")
@@ -86,31 +95,39 @@ st.write(f"Cashflow mensuel : **{cashflow_mensuel:.0f} €**")
 st.write(f"Cashflow annuel : **{cashflow_annuel:.0f} €**")
 st.write(f"Rendement sur fonds propres : **{rendement_fond_propre:.0f} %**")
 
-with st.expander("⚙️ Sauvegarde"):
-    nom_projet = st.text_input("Nom du projet à sauvegarder")
-    if st.button("💾 Sauvegarder ce projet"):
-        data = {
-            "prix": prix,
-            "surface": surface,
-            "frais_notaire": frais_notaire,
-            "frais_agence": frais_agence,
-            "achat_mobilier": achat_mobilier,
-            "travaux": travaux,
-            "loyer": loyer,
-            "charges_recuperable": charges_recuperable,
-            "charges_copro": charges_copro,
-            "taxe_fonciere": taxe_fonciere,
-            "assurance": assurance,
-            "frais_gestion": frais_gestion,
-            "frais_dossier": frais_dossier,
-            "apport_personnel": apport_personnel,
-            "montant_pret": montant_pret,
-            "taux_interet": taux_interet,
-            "duree_pret": duree_pret
-        }
-        save_project(nom_projet, data)
+st.markdown("---")
+with st.expander("📁 Sauvegarder"):
+    data_sqlite = {
+        "prix": prix,
+        "surface": surface,
+        "frais_notaire": frais_notaire,
+        "frais_agence": frais_agence,
+        "achat_mobilier": achat_mobilier,
+        "travaux": travaux,
+        "loyer": loyer,
+        "charges_recuperable": charges_recuperable,
+        "charges_copro": charges_copro,
+        "taxe_fonciere": taxe_fonciere,
+        "assurance": assurance,
+        "frais_gestion": frais_gestion,
+        "frais_dossier": frais_dossier,
+        "apport_personnel": apport_personnel,
+        "montant_pret": montant_pret,
+        "taux_interet": taux_interet,
+        "duree_pret": duree_pret
+    }
+
+    st.markdown("### 💾 Sauvegarde dans l'application (PROTO)")
+    nom_projet = st.text_input("Nom du projet à sauvegarder", key="nom_projet")
+    if st.button("💾 Sauvegarder dans l'application (PROTO)"):
+        save_project(nom_projet, data_sqlite)
         st.success(f"Projet '{nom_projet}' sauvegardé ✅")
 
+    st.markdown("---")
+    st.markdown("### 📥 Exporter en fichier local (.json)")
+    data_export = data_sqlite  # on réutilise la même structure
+    json_bytes = json.dumps(data_export, indent=2).encode("utf-8")
+    st.download_button("📥 Télécharger ce projet (.json)", json_bytes, file_name=f"{nom_projet or 'projet'}.json", mime="application/json")
 
 st.markdown("---")
 st.markdown("💖 **Soutenir ce projet**")
